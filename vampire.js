@@ -53,22 +53,6 @@ class Vampire {
       child.depthFirstTraversal();
   }
 
-  /** Tree traversal methods **/
-
-  // Returns the vampire object with that name, or null if no vampire exists with that name
-  vampireWithName(name) {
-    
-  }
-
-  // Returns the total number of vampires that exist
-  get totalDescendents() {
-    
-  }
-
-  // Returns an array of all the vampires that were converted after 1980
-  get allMillennialVampires() {
-    
-  }
 
   /** Stretch **/
 
@@ -77,30 +61,78 @@ class Vampire {
   // For example:
   // * when comparing Ansel and Sarah, Ansel is the closest common anscestor.
   // * when comparing Ansel and Andrew, Ansel is the closest common anscestor.
-  // closestCommonAncestor(vampire) {
-  //   let ancestor = "";
-  //   let currentAncestor = this.creator;
 
-  //   // if (this.creator === vampire.creator) {
-  //   //   return this.creator;
-  //   // }
+  //https://www.geeksforgeeks.org/lowest-common-ancestor-binary-tree-set-1/
+  closestCommonAncestor(vampire) {
+    let current = this;
+    let currentPath = [];
+    let vampirePath = [];
 
-  //   // if (this.name === vampire.creator) {
-  //   //   return this.name;
-  //   // }
+    while (current) {
+      currentPath.push(current);
+      current = current.creator;
+    }
+    currentPath.reverse();
 
-  //   while (currentAncestor.creator) {
-  //     if (currentAncestor.creator === vampire.creator) {
-  //       ancestor = currentAncestor.creator;
-  //     } else if (this.name === vampire.creator) {
-  //       ancestor = this.name;
-  //     } else {
-  //       currentAncestor = currentAncestor.creator;
-  //     }
-  //     return ancestor.name;
-  //   }
-  // }
+    while (vampire) {
+      vampirePath.push(vampire);
+      vampire = vampire.creator;
+    }
+    vampirePath.reverse();
 
+    let i = 0;
+    for (i; i < currentPath.length && i < vampirePath.length; i++) {
+      //no "-1" after length because in the loop we don't want to stop at where it breaks, but rather keep on going once more.
+      if (currentPath[i] !== vampirePath[i]) {
+        break;
+      }
+    }
+    return currentPath[i - 1];
+  }
+
+  /** Tree traversal methods **/
+
+  // Returns the vampire object with that name, or null if no vampire exists with that name
+  vampireWithName(name) {
+    if (this.name === name) {
+      return this;
+    }
+
+    for (const child of this.offspring) {
+      const vampName = child.vampireWithName(name);
+      if (vampName !== null) {
+        return vampName;
+      }
+    }
+
+    return null;
+  }
+
+  // Returns the total number of vampires that exist
+  get totalDescendents() {
+    let totalDescendents = 0;
+
+    for (const child of this.offspring) {
+      totalDescendents += 1;
+      totalDescendents += child.totalDescendents;
+    }
+    return totalDescendents;
+  }
+
+  // Returns an array of all the vampires that were converted after 1980
+  get allMillennialVampires() {
+    let convertedAfter = [];
+
+    if (this.yearConverted > 1980) {
+      convertedAfter.push(this);
+    }
+    
+    for (const child of this.offspring) {
+      const childConvertedAfter = child.allMillennialVampires;
+      convertedAfter = convertedAfter.concat(childConvertedAfter);
+    }
+    return convertedAfter;
+  }
 }
 
 const original = new Vampire("Original", 300);
@@ -120,19 +152,8 @@ ansel.addOffspring(sarah);
 
 elgort.addOffspring(andrew);
 
-
-// console.log(andrew.creator);
-// console.log(sarah.creator);
-
-
-// //bottom up
-// console.log(andrew.closestCommonAncestor(sarah));
-// console.log(ansel.closestCommonAncestor(andrew));
-
-// //top down
-// console.log(sarah.closestCommonAncestor(andrew));
-
-console.log(original.depthFirstTraversal());
+// console.log(original.allMillennialVampires);
+console.log(andrew.closestCommonAncestor(elgort));
 
 
 
